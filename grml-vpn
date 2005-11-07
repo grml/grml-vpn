@@ -98,9 +98,9 @@ USAGE EXAMPLE:
   Vpn with 2 computers (same command on both computers):
     grml-vpn -k testpw add 1000 192.168.0.1 192.168.0.2
   Vpn with 3 computers:
-    1.PC: grml-vpn -k testpw -n 192.168.0.1 add 1000 192.168.0.1 192.168.0.2 192.168.0.3
-    2.PC: grml-vpn -k testpw -n 192.168.0.2 add 1000 192.168.0.1 192.168.0.2 192.168.0.3
-    3.PC: grml-vpn -k testpw -n 192.168.0.3 add 1000 192.168.0.1 192.168.0.2 192.168.0.3
+    1.PC: grml-vpn -k testpw -a 192.168.0.1 add 1000 192.168.0.1 192.168.0.2 192.168.0.3
+    2.PC: grml-vpn -k testpw -a 192.168.0.2 add 1000 192.168.0.1 192.168.0.2 192.168.0.3
+    3.PC: grml-vpn -k testpw -a 192.168.0.3 add 1000 192.168.0.1 192.168.0.2 192.168.0.3
 
 EOT
 }

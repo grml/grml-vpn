@@ -1,8 +1,9 @@
 grml-vpn (0.10) unstable; urgency=low
 
-  * a few fixes 
+  * a few fixes
+  * adjusted usage examples in grml-vpn help 
 
- -- Michael Gebetsroither <michael.geb@gmx.at>  Tue,  1 Nov 2005 20:08:43 +0100
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Mon,  7 Nov 2005 12:33:51 +0100
 
 grml-vpn (0.09) unstable; urgency=low
 
