@@ -429,6 +429,11 @@ done
 shift $(($OPTIND - 1))  # set ARGV to the first not parsed commandline parameter
 setVerbose $verbose_
 
+case "$1" in
+  info) ACTION_='info'; actionInfo; exit 0 ;;
+  help) ACTION_='help'; printUsage; exit 0 ;;
+esac
+
 checkRoot die "You have to be root to use this program"
 disableSyslog
 
@@ -436,8 +441,6 @@ disableSyslog
 case "$1" in
   show) ACTION_='show'; actionShow; exit 0 ;;
   clear) ACTION_='clear'; actionClear; exit 0 ;;
-  info) ACTION_='info'; actionInfo; exit 0 ;;
-  help) ACTION_='help'; printUsage; exit 0 ;;
   "") printUsage; exit 0 ;;
 esac
 

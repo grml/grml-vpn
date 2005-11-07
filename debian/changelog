@@ -1,3 +1,9 @@
+grml-vpn (0.11) unstable; urgency=low
+
+  * make grml-vpn -h/help work as normal user also 
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Mon,  7 Nov 2005 16:47:54 +0100
+
 grml-vpn (0.10) unstable; urgency=low
 
   * a few fixes
