@@ -1,0 +1,77 @@
+grml-vpn (0.10) unstable; urgency=low
+
+  * a few fixes 
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Tue,  1 Nov 2005 20:08:43 +0100
+
+grml-vpn (0.09) unstable; urgency=low
+
+  * new working version
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Wed, 12 Oct 2005 16:08:36 +0200
+
+grml-vpn (0.08) unstable; urgency=low
+
+  * a few manpage fixes (thx to mika)
+  * fixed false prog_name from change to zsh
+  * added usage example to -h/help
+  * changed manpage to asciidoc (no more nroff, NEVER)
+  * updated build dependencies (sorry, are quite heavy now)
+  * fixed dir layout 
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Sat,  8 Oct 2005 18:21:21 +0200
+
+grml-vpn (0.07) unstable; urgency=low
+
+  * added manpage fixes
+  * added TODO (for future features)
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Mon,  3 Oct 2005 21:50:45 +0200
+
+grml-vpn (0.06) unstable; urgency=low
+
+  * manpage added
+  * added fix in key lenght check 
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Mon,  3 Oct 2005 15:18:07 +0200
+
+grml-vpn (0.05) unstable; urgency=low
+
+  * zsh compatibility fix
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Mon,  3 Oct 2005 11:16:43 +0200
+
+grml-vpn (0.04) unstable; urgency=low
+
+  * added fix for reading ips from cmd and vpn with only 2 computers (special
+    case without -a)
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Thu, 29 Sep 2005 21:01:16 +0200
+
+grml-vpn (0.03) unstable; urgency=low
+
+  * added fix for vpns >2 computers (problems with SPI)
+  * make grml-vpn zsh only, sorry, but bash could not count! 
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Thu, 29 Sep 2005 18:48:53 +0200
+
+grml-vpn (0.02) unstable; urgency=low
+
+  * added options for different ciphers (-e)
+  * regular expression cipher name matching
+  * added option for key length (-b)
+  * generic checks if a keylenght is supported by a specific cipher
+  * added option for shell output (standalone shellscript)
+  * added option for raw key input (-K)
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Mon, 26 Sep 2005 04:05:09 +0200
+
+grml-vpn (0.01) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Sat, 24 Sep 2005 21:39:23 +0200
+
+Local variables:
+mode: debian-changelog
+End:

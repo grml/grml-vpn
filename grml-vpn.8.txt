@@ -1,0 +1,108 @@
+GRML-VPN(8)
+==========
+Michael Gebetsroither <michael.geb@gmx.at>
+
+
+NAME
+----
+grml-vpn - program to establish encrypted communication channels in a network
+
+
+SYNOPSIS
+--------
+*grml-vpn* [OPTIONS] '<ACTION>' '<SPI>' [IPs]
+
+
+DESCRIPTION
+-----------
+*grml-vpn* is a program that
+provides an easy wrapper arround ipsec and setkey (without any ike daemon).
+With this program you can create a vpn based uppon ipsec to any number of computers.
+It's intended purpose is for example for wlan sessions to create an encrypted network between all computers on the wlan.
+It is also possible to create a standalone shellscript which only needs the setkey command to setup the vpn (using the -x option).
+
+
+ACTIONS
+-------
+*add*::
+  Add an ipsec entry
+
+*del*::
+  Delete an specific ipsec entry
+
+*clear*::
+  Delete all ipsec entries (attention, really deletes _all_ entrys, even from other setkey commands and isakmpd).
+
+*show*::
+  Show all infos about ipsec entrys.
+
+*info*::
+  Give infos about ciphers and there allowed keysizes.
+
+*help*::
+  Show the help message.
+
+
+OPTIONS
+-------
+*-h, help*::
+Show summary of options.
+
+*-v*::
+Show what is going on (more v => more out).
+
+*-a <IP>*::
+Your IP (currently necessary for vpns with more than 2 computers).
+
+*-e <ciphername> (default=rijndael-cbc, better known as AES)*::
+Cipher name. Will be matched against ciphers available for ipsec (all ciphers not only the available ciphers on your box).
+eg. "-e two" will match twofish-cbc. If more then one ciphers matches your regexp than the matches are printed and grml-vpn aborts.
+
+*-b <keysize> (default=256 bit)*::
+Keysize used for your encryption.
+
+*-k <key>*::
+Your key/password for the vpn (will be hashed).
+
+*-K <raw-key>*::
+Set raw key (you determine the keysize, not -b).
+
+*-f <input-file>*::
+Read IPs for encrypted connections from file (same as from stdin).
+
+*-c*::
+Read IPs from stdin (setkey commands are not written until _all_ IPs are read from stdin).
+
+*-p*::
+Only print the setkey commands (eg. grml-vpn -p ... |setkey -c).
+USE THIS if you create a vpn with many computers, because this is a bit faster).
+
+*-x*::
+Print a standalone shellscript which only needs setkey to setup the vpn.
+
+
+EXAMPLES
+--------
+*grml-vpn -k testpw -b 128 add 1000 192.168.0.1 192.168.0.2*::
+Creates encrypted connections between the two IPs possible, with the pre shared key (PSK) testpw and 128bit rijndael-cbc. You have to execute this command on both computers (if you type this command only on one computer, then it's impossible to create an connection between the two computers).
+NOTE: with only 2 computers it's not necessary to specify your own ip with -a.
+
+*grml-vpn -e bl -b 255 -a 192.168.0.2 add 2000 192.168.0.1 192.168.0.2 192.168.0.3*::
+Encrypted connections between all 3 computers. This command should be executed on 192.168.0.2 (-a) and on the other two computers with the appropriate -a <IP>.
+The cipher is blowfisch-cbc (no, -e bl is NO typo ;).
+
+*grml-vpn -a 192.168.0.2 del 2000 192.168.0.1 192.168.0.2 192.168.0.3*::
+This command deletes the previous created encrypted connections on 192.168.0.2 (after this command it's impossible to send data to 192.168.0.{1,3} until you delete the vpn entrys on them (no, even ssh does not work anymore).
+You should execute this command on all computers of the vpn (with the appropriate -a <IP> option). You could also use grml-crypt clear to clear all vpn settings.
+
+
+SEE ALSO
+--------
+setkey(8)
+
+
+AUTHOR
+------
+grml-vpn was written by Michael Gebetsroither <michael.geb@gmx.at>.
+
+This manual page was written by Michael Gebetsroither <gebi@grml.org>.

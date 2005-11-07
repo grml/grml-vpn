@@ -1,0 +1,527 @@
+#!/usr/bin/zsh
+# Filename:      grml-vpn
+# Purpose:       Program to establish encrypted communication channels in a network
+# Authors:       Michael Gebetsroither <gebi@grml.org>
+# Bug-Reports:   see http://grml.org/bugs/
+# License:       This file is licensed under the GPL v2.
+# Latest change: Mon Aug 08 11:37:20 CEST 2005
+################################################################################
+
+
+###
+### __INCLUDES
+###
+. /etc/grml/sh-lib
+#. /etc/grml/sysexits-sh
+
+
+
+###
+### __VARIABLES
+###
+
+verbose_=0
+SETKEY_='setkey'    # setkey command for internal use
+SETKEY_PRINT_='setkey'     # setkey command for ipsec use (could also be cat)
+SETKEY_ARG_='-c'    # arguments for setkey
+IP_FILE_=''         # file to read the IPs
+FROM_FILE_='false'  # input methode file (default=cmd)
+FROM_STDIN_='false' # input methode stdin (default=cmd)
+READ_IP_F_=''    # function to get IPs from
+SPI_=''      # SPI to start with (user given)
+IP_=""      # own ip
+KEY_=''     # encryption key (allready hashed)
+ORIG_KEY_=''  # untouched user key
+KEY_IS_SET_='false'   # true if the user has given the key on the cmd
+KEY_IS_SET_RAW_='false' # true if the user wants to give us raw key material
+KEY_SIZE_='256'       # keysize
+OUTPUT_SCRIPT_='false'  # outputs standalone shell script
+TMP_=''   # path to the tmp-file
+
+# 1. cipher-name
+# with 1 argument after name:   only this is supported
+# with 2 arguments after name:  from to
+# with 3 arguments after name:  only they are supported
+CIPHER_='rijndael-cbc'
+CIPHERS_="des-cbc 64
+3des-cbc  192
+blowfish-cbc 40 448
+cast128-cbc 40 128
+des-deriv 64
+3des-deriv 192
+rijndael-cbc 128 192 256
+twofish-cbc 0 256
+aes-ctr 160 224 288"
+
+
+
+###
+### __FUNCTIONS
+###
+
+function printUsage
+{
+  cat <<EOT
+Usage: "$PROG_NAME__" [OPTIONS] <ACTION> <SPI> [IPs]
+
+$PROG_NAME__ is a program to establish encrypted communication channels in a network
+
+OPTIONS:
+   -a         your IP (only necessary for vpn's with more than 2 computers)
+   -e         encryption algorithm name regexp (default=$CIPHER_)
+   -b         keysize (0-448 bits are allowed)
+   -k         manually set the key (will be hashed, default=${KEY_SIZE_}bit)
+   -K         set raw key (could be any keysize supported by the kernel)
+   -f         read IPs from file (one IP per line)
+   -c         read IPs from stdin (one IP per line)
+   -p         only print commands for setkey (grml-vpn -p xxx |setkey)
+   -x         print commands wrapped into an standalone shellscript (enables -p)
+   -h         this help text
+
+ACTIONS:
+   show       Shows the kernel ipsec entrys
+   add        add ipsec entrys
+   del        delete specific ipsec entrys
+   clear      delete all ipsec entrys
+   info       give info about ciphers and available keysizes
+   help       this help text
+
+NOTICE:
+   IPs given to this programm should be ALWAYS in the SAME ORDER and with the SAME SPI
+   on all hosts of the vpn.  THIS IS ABSOLUTY NECESSARY!!!
+   For vpns above 2 computers you have to specify your IP twice. Once in the IPs and once
+   with -n <your IP> (the IPs have to be in the same order on all hosts of the vpn).
+
+   SPI == Security Parameter Index (decimal value between 256 and ~2^32)
+
+USAGE EXAMPLE:
+  Vpn with 2 computers (same command on both computers):
+    grml-vpn -k testpw add 1000 192.168.0.1 192.168.0.2
+  Vpn with 3 computers:
+    1.PC: grml-vpn -k testpw -n 192.168.0.1 add 1000 192.168.0.1 192.168.0.2 192.168.0.3
+    2.PC: grml-vpn -k testpw -n 192.168.0.2 add 1000 192.168.0.1 192.168.0.2 192.168.0.3
+    3.PC: grml-vpn -k testpw -n 192.168.0.3 add 1000 192.168.0.1 192.168.0.2 192.168.0.3
+
+EOT
+}
+
+
+function printShellHeader
+{
+  local date_=`date -Is`
+  cat <<EOT
+#!/bin/sh
+# standalone vpn script from grml-vpn
+# written on $date_
+
+cat <<EOX |setkey -c
+EOT
+}
+
+function printShellFooter
+{
+  cat <<EOT
+EOX
+
+# END OF FILE
+################################################################################
+EOT
+}
+
+function actionShow
+{
+  execute "$SETKEY_ -D" warn
+  execute "$SETKEY_ -DP" warn
+}
+
+
+function addIP
+{
+  local cnt_="$1"
+  local ip_="$2"
+  local ip2_="$3"
+
+  cat << EOT | $SETKEY_PRINT_ $SETKEY_ARG_ #|| warn "problems executing $SETKEY_PRINT_ ret($?)"
+add $ip_ $ip2_ esp $cnt_ -E rijndael-cbc
+  0x$KEY_;
+spdadd $ip_ $ip2_ any -P out ipsec
+  esp/transport//require;
+
+EOT
+}
+
+function delIP
+{
+  local cnt_="$1"
+  local ip_="$2"
+  local ip2_="$3"
+  
+  cat << EOT | $SETKEY_PRINT_ $SETKEY_ARG_ #|| warn "problems executing $SETKEY_PRINT_ ret($?)"
+delete $ip_ $ip2_ esp $cnt_;
+spddelete $ip_ $ip2_ any -P out;
+
+EOT
+
+}
+
+# ATTENTION IF YOU CHANGE ANYTHING IN THIS FUNCTION
+function generateRules
+{
+  local cnt_="$SPI_"  # current value of spi
+  local ip_=''
+  local ip2_=''
+  local tmp_=''
+
+  cat "$TMP_" |while read ip_; do
+    cat "$TMP_" |while read ip2_; do
+      if [[ "$ip_" == "$ip2_" ]]; then
+        #((cnt_++)) not shure if necessary
+        continue
+      fi
+      if [[ "$ip_" != "$IP_" && "$ip2_" != "$IP_" ]]; then
+        ((cnt_++))
+        continue
+      fi
+      #echo "$cnt_ $ip_ $ip2_"
+      $ACTION_ "$cnt_" "$ip_" "$ip2_"
+      ((cnt_++))
+    done
+  done
+}
+
+
+function getIPsFromCmd
+{
+  while (( $# != 0 )); do
+    case "$1" in      # Do not prozess
+      "") continue ;;   #   an empty IP
+      \#*) continue ;;  #   a comment
+    esac
+    echo "$1" >> "$TMP_"
+    shift
+  done
+
+  # yea... got all ip's
+  generateRules
+}
+
+function getIPsFromFile
+{
+  local ip_=""
+
+  isExistent "$IP_FILE_" die
+  cat "$IP_FILE_" |while read ip_; do
+    case "$ip_" in      # Do not prozess
+      "") continue ;;   #   an empty IP
+      \#*) continue ;;  #   a comment
+    esac
+    echo "$ip_" >> "$TMP_"
+  done
+
+  generateRules
+}
+
+function getIPsFromStdin
+{
+  local ip_=""
+
+  while read ip_; do
+    case "$ip_" in
+      "") continue ;;
+      \#*) continue ;;
+    esac
+    echo "$ip_" >> "$TMP_"
+  done
+
+  generateRules
+}
+  
+
+function actionClear
+{
+  cat << EOT | setkey -c
+flush;
+spdflush;
+EOT
+}
+
+function actionInfo
+{
+  cat << EOT
+  algorithm       keylen (bits)   documented in
+ -----------------------------------------------------------------
+  des-cbc         64              esp-old: rfc1829, esp: rfc2405
+  3des-cbc        192             rfc2451
+  blowfish-cbc    40 to 448       rfc2451
+  cast128-cbc     40 to 128       rfc2451
+  des-deriv       64              ipsec-ciph-des-derived-01
+  3des-deriv      192             no document
+  rijndael-cbc    128/192/256     rfc3602
+  twofish-cbc     0 to 256        draft-ietf-ipsec-ciph-aes-cbc-01
+  aes-ctr         160/224/288     draft-ietf-ipsec-ciph-aes-ctr-03
+EOT
+}
+
+
+function checkKey
+{
+  local key_="$1"
+
+  if [[ "$key_" == "" ]]; then
+    die "invalied key \"$key_\""
+  fi
+}
+
+function checkCipher
+{
+  local cipher_="$1"
+
+  if [[ "$cipher_" == "" ]]; then
+    die "you have to give me an real cipher"
+  fi
+  echo "$CIPHERS_" |grep $cipher_ &>/dev/null || die "unsupported cipher \"$cipher_\""
+}
+
+# this function checks the keysize and matches the cipher name against
+# them in $CIPHERS_
+function checkKeySize
+{
+  local ciph_=''
+  local tmp_=''
+
+  ciph_=`echo -e "$CIPHERS_" |grep -E "$CIPHER_"`
+  tmp_=`echo -e "$ciph_" |wc -l`
+  case "$tmp_" in
+    0)  die "cipher \"$CIPHER_\" not supported" ;;
+    1)  dprint "checkKeySize(): ciphername \"$CIPHER_\" valied (unique)" ;;
+    *)  warn "ciphername should be unique, but following matched:"
+          echo -e "$ciph_" |awk '{print "\t"$1}'
+          die "cipher \"$CIPHER_\" not unique" ;;
+  esac
+
+  # only one cipher matched
+  tmp_=`echo $ciph_ |awk '{print $1}'`
+  if [[ "$tmp_" != "$CIPHER_" ]]; then
+    warn "your cipher produced an unique match for $tmp_, using this"
+    CIPHER_="$tmp_"
+  fi
+
+  # check the keysize for the specific cipher
+  local one_=''
+  local two_=''
+  local three_=''
+  local i=''
+  tmp_=`echo "$ciph_" |wc -w`
+  case "$tmp_" in
+    2) one_=`echo $ciph_ |awk '{print $2}'`   # 1 value is one value ;)
+        if [[ "$one_" != "$KEY_SIZE_" ]]; then
+          die "keysize \"$KEY_SIZE_\" not supported by $CIPHER_ (only $one_ is allowed)"
+        else
+          dprint "checkKeySize(): keysize \"$KEY_SIZE_\" _IS_ supported by $CIPHER_ ($one_)"
+        fi
+        ;;
+    3)  one_=`echo $ciph_ |awk '{print $2}'`    # 2 values are a range
+        two_=`echo $ciph_ |awk '{print $3}'`
+        if (( $KEY_SIZE_ >= $one_ && $KEY_SIZE_ <= $two_ )); then
+          dprint "checkKeySize(): keysize \"$KEY_SIZE_\" _IS_ supported by $CIPHER_ ($one_-$two_)"
+        else
+          die "keysize \"$KEY_SIZE_\" not supported by $CIPHER_ (must be between $one_ and $two_)"
+        fi
+         ;;
+    4)  one_=`echo $ciph_ |awk '{print $2}'`    # 3 values are an enumeration
+        two_=`echo $ciph_ |awk '{print $3}'`
+        three_=`echo $ciph_ |awk '{print $4}'`
+        tmp_='false'
+        for i in $one_ $two_ $three_; do
+          if [[ "$i" == "$KEY_SIZE_" ]]; then
+            tmp_='true'
+          fi
+        done
+        $tmp_ || die "keysize \"$KEY_SIZE_\" not supported by $CIPHER_ (must be $one_, $two_ or $three_)"
+        $tmp_ && dprint "checkKeySize(): keysize \"$KEY_SIZE_\" _IS_ supported by $CIPHER_ ($one_, $two_, $three_)"
+         ;;
+    *)  die "internal error (problem with CIPHERS_ $tmp_)"
+  esac
+  
+  local byte_=''
+  byte_=`echo "$KEY_SIZE_/8"|bc -q`
+  tmp_=`echo "$KEY_SIZE_%4" |bc -q`
+  if [[ "$tmp_" != "0" ]]; then
+    die "your given keysize \"$KEY_SIZE_\" is not a multiple of 4"
+  fi
+  dprint "checkKeySize(): key is $byte_ byte long"
+
+}
+
+
+function hashKey
+{
+  local key_="$1"
+  local gen_="${2:-"false"}"    # if false, do not generate a key
+
+  local to_die_='false'
+  local byte_=`echo "$KEY_SIZE_/4"|bc -q`
+  local tmp_=""
+  
+  #case "$KEY_SIZE_" in
+  #  128)  notice "key_size=$KEY_SIZE_"; echo "$key_" |md5deep ||to_die_='true'
+  #          $to_die_ && die "problems with hashing your key"
+  #          return 0 ;;
+  #  256)  notice "key_size=$KEY_SIZE_"; echo "$key_" |sha256deep ||to_die_='true'
+  #          $to_die_ && die "problems with hashing your key"
+  #          return 0 ;;
+  #esac
+
+  dprint "hashKey(): oh.. i've to fiddle with the key"
+
+  if (( $KEY_SIZE_ == 0 )); then
+    tmp_=''
+  elif (( $KEY_SIZE_ <= 128 )); then
+    tmp_=`echo "$key_" |md5deep` ||to_die_='true'
+  elif (( $KEY_SIZE_ <= 256 )); then
+    tmp_=`echo "$key_" |sha256deep` ||to_die_='true'
+  elif (( $KEY_SIZE_ <= 512 )); then
+    # FIXME add support for keys > 512bit
+    die "key_sizes greater 256bit are _CURRENTLY_ not supported"
+  else
+    die "key_size \"$KEY_SIZE_\" not supported"
+  fi
+  $to_die_ && die "problems with hashing your key"
+
+  tmp_=`echo "$tmp_" |cut -c "-$byte_"`
+  dprint "hashKey(): key is \"$tmp_\""
+  echo "$tmp_"
+}
+
+
+function removeTmpFiles
+{
+  execute "rm -f $TMP_" warn
+}
+
+
+###
+### __MAIN
+###
+
+PROG_NAME__=`basename $0`
+while getopts "a:b:e:k:K:n:cf:pxhv" opt; do
+  case "$opt" in
+    a) IP_="$OPTARG" ;;
+    b) KEY_SIZE_="$OPTARG" ;;
+    e) CIPHER_="$OPTARG" ;;
+    k) ORIG_KEY_="$OPTARG"
+        KEY_IS_SET_='true' ;;
+    K) ORIG_KEY_="$OPTARG"
+        KEY_IS_SET_RAW_='true' ;;
+    n) NUM_HOSTS_="$OPTARG" ;;
+    c) FROM_STDIN_='true' ;;
+    f) FROM_FILE_='true'
+        IP_FILE_="$OPTARG" ;;
+    p) SETKEY_PRINT_='cat'; SETKEY_ARG_='' ;;
+    x) OUTPUT_SCRIPT_='true'
+        SETKEY_PRINT_='cat'; SETKEY_ARG_=''  ;;
+    h) printUsage; exit ;;
+    v) let verbose_=$verbose_+1 ;;
+    ?) printUsage; exit 64 ;;
+  esac
+done
+shift $(($OPTIND - 1))  # set ARGV to the first not parsed commandline parameter
+setVerbose $verbose_
+
+checkRoot die "You have to be root to use this program"
+disableSyslog
+
+
+case "$1" in
+  show) ACTION_='show'; actionShow; exit 0 ;;
+  clear) ACTION_='clear'; actionClear; exit 0 ;;
+  info) ACTION_='info'; actionInfo; exit 0 ;;
+  help) ACTION_='help'; printUsage; exit 0 ;;
+  "") printUsage; exit 0 ;;
+esac
+
+# controle input methodes selected from user
+if [[ "$FROM_FILE_" == 'true' && "$FROM_STDIN_" == 'true' ]]; then
+  die "Please select only one input-methode" 1
+fi
+
+# tests to verify the keysize
+checkKeySize
+
+# control/hash the encryption key
+if [[ "$KEY_IS_SET_" == 'true' && "$KEY_IS_SET_RAW_" == 'true' ]]; then
+  die "Please specify only one key"
+elif [[ "$KEY_IS_SET_" == 'true' ]]; then
+  # user supplied key
+  KEY_=`hashKey "$ORIG_KEY_"`
+else
+  # RAW key
+  KEY_="$ORIG_KEY_"
+fi
+
+# get action
+USER_ACTION_="$1"
+shift
+
+# save SPI
+SPI_="$1"
+if [[ "$SPI_" == "" ]]; then
+  die "you should give me the Security Parameter Index (SPI)"
+fi
+if (( $SPI_ <= 255 )); then
+  die "SPI values between 0 and 255 cannot be used"
+fi
+shift
+
+# set aproppriate functions
+if [[ "$FROM_FILE_" == 'true' ]]; then
+  READ_IP_F_='getIPsFromFile'
+elif [[ "$FROM_STDIN_" == 'true' ]]; then
+  READ_IP_F_='getIPsFromStdin'
+else
+  READ_IP_F_='getIPsFromCmd'
+
+  # save own IP
+  if [[ "$IP_" == "" ]]; then
+    # if no ip is given with -a
+    if (( $# >= 3 )); then
+      # if vpn with more than 2 hosts
+      die "you have to give me YOUR ip with -a <your ip>"
+    fi
+    IP_="$1"
+    notice "no ip given, using $IP_ as your ip"
+  fi
+  if [[ "$IP_" == "" ]]; then
+    die "you should give me your ip"
+  fi
+fi
+TMP_=`mktemp -t grml-vpn-XXXXXX || die 'could not create tmp file' $?`
+setExitFunction 'removeTmpFiles'
+
+case "$USER_ACTION_" in
+  add) ACTION_='addIP'
+        # check if i have to generate a random key and print it for the user
+        if [[ "$KEY_IS_SET_" == 'false' && "$KEY_IS_SET_RAW_" == 'false' ]]; then
+          notice "key not set, generating"
+          ORIG_KEY_="`dd if=/dev/urandom bs=512 count=1 2>/dev/null`"
+          KEY_=`hashKey "$ORIG_KEY_"`
+          echo "$KEY_" >&2
+          checkKey "$KEY_"
+        fi
+
+        $OUTPUT_SCRIPT_ && printShellHeader
+        $READ_IP_F_ $@
+        ;;
+  del) ACTION_='delIP';
+        $OUTPUT_SCRIPT_ && printShellHeader
+        $READ_IP_F_ $@ ;;
+  *)  printUsage; die "Unknown action $1" ;;
+esac
+
+$OUTPUT_SCRIPT_ && printShellFooter
+removeTmpFiles
+
+# END OF FILE
+################################################################################
+# vim:foldmethod=marker
