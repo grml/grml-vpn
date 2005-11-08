@@ -172,6 +172,8 @@ function generateRules
   local ip2_=''
   local tmp_=''
 
+  grep "^$IP_$" "$TMP_" &>/dev/null || die "your ip should be in the list (your ip = $IP_)"
+
   cat "$TMP_" |while read ip_; do
     cat "$TMP_" |while read ip2_; do
       if [[ "$ip_" == "$ip2_" ]]; then
@@ -179,6 +181,7 @@ function generateRules
         continue
       fi
       if [[ "$ip_" != "$IP_" && "$ip2_" != "$IP_" ]]; then
+        dprint "not writing setkey entry for: localip=$IP_ from=$ip_ to=$ip2_"
         ((cnt_++))
         continue
       fi
@@ -507,9 +510,9 @@ else
       notice "no ip given, using $IP_ as your ip"
     fi
   fi
-  if [[ "$IP_" == "" ]]; then
-    die "you should give me your ip"
-  fi
+fi
+if [[ "$IP_" == "" ]]; then
+  die "you should give me your ip"
 fi
 TMP_=`mktemp -t grml-vpn-XXXXXX || die 'could not create tmp file' $?`
 setExitFunction 'removeTmpFiles'
