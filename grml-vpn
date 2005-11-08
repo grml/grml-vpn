@@ -527,4 +527,4 @@ removeTmpFiles
 
 # END OF FILE
 ################################################################################
-# vim:foldmethod=marker
+# vim:foldmethod=marker tabstop=2 expandtab
