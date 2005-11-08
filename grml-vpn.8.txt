@@ -52,7 +52,7 @@ Show summary of options.
 Show what is going on (more v => more out).
 
 *-a <IP>*::
-Your IP (currently necessary for vpns with more than 2 computers).
+Your IP (currently necessary for vpns with more than 2 computers given in file or on stdin). If IPs are given on commandline, the script tries hard to guess your IP.
 
 *-e <ciphername> (default=rijndael-cbc, better known as AES)*::
 Cipher name. Will be matched against ciphers available for ipsec (all ciphers not only the available ciphers on your box).

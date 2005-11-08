@@ -67,7 +67,7 @@ Usage: "$PROG_NAME__" [OPTIONS] <ACTION> <SPI> [IPs]
 $PROG_NAME__ is a program to establish encrypted communication channels in a network
 
 OPTIONS:
-   -a         your IP (only necessary for vpn's with more than 2 computers)
+   -a         your IP (maybe necessary for vpn's with more than 2 computers)
    -e         encryption algorithm name regexp (default=$CIPHER_)
    -b         keysize (0-448 bits are allowed)
    -k         manually set the key (will be hashed, default=${KEY_SIZE_}bit)
@@ -489,11 +489,23 @@ else
   if [[ "$IP_" == "" ]]; then
     # if no ip is given with -a
     if (( $# >= 3 )); then
-      # if vpn with more than 2 hosts
-      die "you have to give me YOUR ip with -a <your ip>"
+      # if vpn with more than 2 hosts, trying to guess the ip
+      # die "you have to give me YOUR ip with -a <your ip>"
+      warn "you did not provide me your ip, trying to guess..."
+      if_="`netGetIfaces`" || warn "problems getting your interfaces"
+      if_="`echo "$if_" |grep -v \^lo`"
+      echo "$if_" | while read tmpif_; do
+        tmpip_=`netGetIp $tmpif_`
+        netValidIp "$tmpip_" && IP_="$tmpip_" && break
+      done
+      if [[ $IP_ == "" ]]; then
+        die "sorry no interface with valied ip found, giving up"
+      fi
+      warn "using $IP_ as your ip"
+    else
+      IP_="$1"
+      notice "no ip given, using $IP_ as your ip"
     fi
-    IP_="$1"
-    notice "no ip given, using $IP_ as your ip"
   fi
   if [[ "$IP_" == "" ]]; then
     die "you should give me your ip"
@@ -527,4 +539,4 @@ removeTmpFiles
 
 # END OF FILE
 ################################################################################
-# vim:foldmethod=marker tabstop=2 expandtab
+# vim:foldmethod=marker tabstop=2 expandtab shiftwidth=2
