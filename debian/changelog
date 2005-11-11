@@ -1,3 +1,9 @@
+grml-vpn (0.12) unstable; urgency=low
+
+  * changed dependency to grml-shlib
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Fri, 11 Nov 2005 20:09:31 +0100
+
 grml-vpn (0.11) unstable; urgency=low
 
   * make grml-vpn -h/help work as normal user also
