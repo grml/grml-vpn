@@ -1,6 +1,5 @@
-  1. autodetection of IPs on the local computer (should make -a nearly useless)
-  2. better handling of "encryption" layers, let the user deside if tunnel/transport mode,
+  - better handling of "encryption" layers, let the user deside if tunnel/transport mode,
       or ah, or ipcomp (or only a few of them). something like --use esp-tun:ah:ipcomp.
       First use ipcomp to compress the data stream, then use ah on the package and then put
       the package into an esp tunnel.
-  3. better stand alone script (also with autodetection of local IPs) - could be quite hard!!
+  - better stand alone script (also with autodetection of local IPs) - could be quite hard!!
