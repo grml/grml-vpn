@@ -542,4 +542,4 @@ removeTmpFiles
 
 # END OF FILE
 ################################################################################
-# vim:foldmethod=marker tabstop=2 expandtab shiftwidth=2
+# vim:foldmethod=marker tabstop=2 expandtab shiftwidth=2 filetype=sh
