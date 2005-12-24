@@ -529,11 +529,11 @@ case "$USER_ACTION_" in
         fi
 
         $OUTPUT_SCRIPT_ && printShellHeader
-        $READ_IP_F_ $@
+        $READ_IP_F_ "$@"
         ;;
   del) ACTION_='delIP';
         $OUTPUT_SCRIPT_ && printShellHeader
-        $READ_IP_F_ $@ ;;
+        $READ_IP_F_ "$@" ;;
   *)  printUsage; die "Unknown action $1" ;;
 esac
 
