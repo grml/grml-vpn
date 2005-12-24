@@ -425,12 +425,11 @@ while getopts "a:b:e:k:K:n:cf:pxhv" opt; do
     x) OUTPUT_SCRIPT_='true'
         SETKEY_PRINT_='cat'; SETKEY_ARG_=''  ;;
     h) printUsage; exit ;;
-    v) let verbose_=$verbose_+1 ;;
+    v) let verbose_=$verbose_+1; setVerbose $verbose_ ;;
     ?) printUsage; exit 64 ;;
   esac
 done
 shift $(($OPTIND - 1))  # set ARGV to the first not parsed commandline parameter
-setVerbose $verbose_
 
 case "$1" in
   info) ACTION_='info'; actionInfo; exit 0 ;;
