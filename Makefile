@@ -1,5 +1,5 @@
-install_ = "install"
-name = "grml-vpn"
+install_ = install
+name_ = grml-vpn
 
 etc = ${DESTDIR}/etc/
 usr = ${DESTDIR}/usr
@@ -9,40 +9,38 @@ usrshare = $(usr)/share/$(name)
 usrdoc = $(usr)/share/doc/$(name)
 man8 = $(usr)/share/man/man8/
 
-#%.html : %.txt ;
-#	asciidoc -b xhtml11 $*.txt
+
+%.html : %.txt ;
+	asciidoc -b xhtml11 $^
+
+%.gz : %.txt ;
+	asciidoc -d manpage -b docbook $^
+	xsltproc /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl `echo $^ |sed -e 's/.txt/.xml/'`
+	gzip -f --best `echo $^ |sed -e 's/.txt//'`
+
 
 all: doc
 
 doc: doc_man doc_html
 
-doc_html: html-stamp
+doc_html: $(name_).8.html
+grml-vpn.8.html: $(name_).8.txt
 
-html-stamp:
-	asciidoc -b xhtml11 grml-vpn.8.txt
-	touch html-stamp
+doc_man: $(name_).8.gz
+grml-vpn.8.gz: $(name_).8.txt
 
-doc_man: man-stamp
 
-man-stamp:
-	asciidoc -d manpage -b docbook grml-vpn.8.txt
-	sed -i 's/<emphasis role="strong">/<emphasis role="bold">/' grml-vpn.8.xml
-	xsltproc /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl grml-vpn.8.xml
-	gzip --best grml-vpn.8
-	touch man-stamp
-
-	
 install: all
 	$(install_) -d -m 755 $(usrdoc)
 	$(install_) -m 644 TODO $(usrdoc)
-	$(install_) -m 644 grml-vpn.8.html $(usrdoc)
+	$(install_) -m 644 $(name_).8.html $(usrdoc)
 
 	$(install_) -d -m 755 $(man8)
-	$(install_) -m 644 grml-vpn.8.gz $(man8)
+	$(install_) -m 644 $(name_).8.gz $(man8)
 
 	$(install_) -m 755 -d $(usrsbin)
-	$(install_) -m 755 grml-vpn $(usrsbin)
+	$(install_) -m 755 $(name_) $(usrsbin)
 
 clean:
-	rm -rf grml-vpn.8.html grml-vpn.8.xml grml-vpn.8 grml-vpn.8.gz html-stamp man-stamp
+	rm -rf $(name_).8.html $(name_).8.xml $(name_).8 $(name_).8.gz
 
