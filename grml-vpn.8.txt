@@ -87,6 +87,10 @@ EXAMPLES
 Creates encrypted connections between the two IPs possible, with the pre shared key (PSK) testpw and 128bit rijndael-cbc. You have to execute this command on both computers (if you type this command only on one computer, then it's impossible to create an connection between the two computers).
 NOTE: with only 2 computers it's not necessary to specify your own ip with -a.
 
+*fakeroot grml-vpn -p -k testpw -b 128 add 1000 192.168.0.1 192.168.0.2*::
+Same as above, but also possible as user.
+Use -x instead of -p if you want a full functional shellscript to be printed to stdout.
+
 *grml-vpn -e bl -b 255 -a 192.168.0.2 add 2000 192.168.0.1 192.168.0.2 192.168.0.3*::
 Encrypted connections between all 3 computers. This command should be executed on 192.168.0.2 (-a) and on the other two computers with the appropriate -a <IP>.
 The cipher is blowfisch-cbc (no, -e bl is NO typo ;).
