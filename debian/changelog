@@ -1,3 +1,13 @@
+grml-vpn (0.13) unstable; urgency=low
+
+  * fixed small problem with spaces in command line args
+  * make debug through DEBUG var work
+  * Makefile fixes
+  * added fakeroot example for user only usage to manpage
+  * added bc to dependencies in debian/control
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Wed, 18 Jan 2006 01:12:54 +0100
+
 grml-vpn (0.12) unstable; urgency=low
 
   * changed dependency to grml-shlib
