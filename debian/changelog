@@ -1,3 +1,9 @@
+grml-vpn (0.14) unstable; urgency=low
+
+  * few small fixes 
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Thu,  2 Feb 2006 17:05:15 +0100
+
 grml-vpn (0.13) unstable; urgency=low
 
   * fixed small problem with spaces in command line args
