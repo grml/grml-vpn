@@ -16,7 +16,7 @@ SYNOPSIS
 DESCRIPTION
 -----------
 *grml-vpn* is a program that
-provides an easy wrapper arround ipsec and setkey (without any ike daemon).
+provides an easy wrapper around ipsec and setkey (without any ike daemon).
 With this program you can create a vpn based uppon ipsec to any number of computers.
 It's intended purpose is for example for wlan sessions to create an encrypted network between all computers on the wlan.
 It is also possible to create a standalone shellscript which only needs the setkey command to setup the vpn (using the -x option).

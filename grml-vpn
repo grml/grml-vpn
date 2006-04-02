@@ -30,7 +30,7 @@ FROM_STDIN_='false' # input methode stdin (default=cmd)
 READ_IP_F_=''    # function to get IPs from
 SPI_=''      # SPI to start with (user given)
 IP_=""      # own ip
-KEY_=''     # encryption key (allready hashed)
+KEY_=''     # encryption key (already hashed)
 ORIG_KEY_=''  # untouched user key
 KEY_IS_SET_='false'   # true if the user has given the key on the cmd
 KEY_IS_SET_RAW_='false' # true if the user wants to give us raw key material
