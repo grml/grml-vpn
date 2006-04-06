@@ -1,3 +1,9 @@
+grml-vpn (0.15) unstable; urgency=low
+
+  * few typo fixes and message corrections 
+
+ -- Michael Gebetsroither <michael.geb@gmx.at>  Fri,  7 Apr 2006 00:15:25 +0200
+
 grml-vpn (0.14) unstable; urgency=low
 
   * few small fixes 

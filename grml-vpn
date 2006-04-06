@@ -436,7 +436,7 @@ case "$1" in
   help) ACTION_='help'; printUsage; exit 0 ;;
 esac
 
-checkRoot die "You have to be root to use this program"
+checkRoot die "You have to be root to use this program (as user try fakeroot)"
 disableSyslog
 
 
