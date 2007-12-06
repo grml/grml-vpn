@@ -1,3 +1,9 @@
+grml-vpn (0.16) unstable; urgency=low
+
+  * Fix manpage handling of xsltproc.
+
+ -- Michael Prokop <mika@grml.org>  Fri, 07 Dec 2007 00:12:21 +0100
+
 grml-vpn (0.15) unstable; urgency=low
 
   * few typo fixes and message corrections 

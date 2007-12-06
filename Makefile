@@ -17,6 +17,8 @@ man8 = $(usr)/share/man/man8/
 	asciidoc -d manpage -b docbook $^
 	sed -i 's/<emphasis role="strong">/<emphasis role="bold">/g' `echo $^ |sed -e 's/.txt/.xml/'`
 	xsltproc /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl `echo $^ |sed -e 's/.txt/.xml/'`
+	# ugly hack to avoid '.sp' at the end of a sentence or paragraph:
+	sed -i 's/\.sp$//' `echo $^ |sed -e 's/.txt//'`
 	gzip -f --best `echo $^ |sed -e 's/.txt//'`
 
 
