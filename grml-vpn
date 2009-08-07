@@ -1,4 +1,4 @@
-#!/usr/bin/zsh
+#!/bin/zsh
 # Filename:      grml-vpn
 # Purpose:       Program to establish encrypted communication channels in a network
 # Authors:       Michael Gebetsroither <gebi@grml.org>
