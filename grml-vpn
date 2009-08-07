@@ -4,7 +4,6 @@
 # Authors:       Michael Gebetsroither <gebi@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Aug 08 11:37:20 CEST 2005
 ################################################################################
 
 
@@ -13,8 +12,6 @@
 ###
 . /etc/grml/sh-lib
 #. /etc/grml/sysexits-sh
-
-
 
 ###
 ### __VARIABLES
@@ -59,7 +56,7 @@ aes-ctr 160 224 288"
 ### __FUNCTIONS
 ###
 
-function printUsage
+printUsage()
 {
   cat <<EOT
 Usage: "$PROG_NAME__" [OPTIONS] <ACTION> <SPI> [IPs]
@@ -106,7 +103,7 @@ EOT
 }
 
 
-function printShellHeader
+printShellHeader()
 {
   local date_=`date -Is`
   cat <<EOT
@@ -118,7 +115,7 @@ cat <<EOX |setkey -c
 EOT
 }
 
-function printShellFooter
+printShellFooter()
 {
   cat <<EOT
 EOX
@@ -128,14 +125,14 @@ EOX
 EOT
 }
 
-function actionShow
+actionShow()
 {
   execute "$SETKEY_ -D" warn
   execute "$SETKEY_ -DP" warn
 }
 
 
-function addIP
+addIP()
 {
   local cnt_="$1"
   local ip_="$2"
@@ -150,12 +147,12 @@ spdadd $ip_ $ip2_ any -P out ipsec
 EOT
 }
 
-function delIP
+delIP()
 {
   local cnt_="$1"
   local ip_="$2"
   local ip2_="$3"
-  
+
   cat << EOT | $SETKEY_PRINT_ $SETKEY_ARG_ #|| warn "problems executing $SETKEY_PRINT_ ret($?)"
 delete $ip_ $ip2_ esp $cnt_;
 spddelete $ip_ $ip2_ any -P out;
@@ -165,7 +162,7 @@ EOT
 }
 
 # ATTENTION IF YOU CHANGE ANYTHING IN THIS FUNCTION
-function generateRules
+generateRules()
 {
   local cnt_="$SPI_"  # current value of spi
   local ip_=''
@@ -193,7 +190,7 @@ function generateRules
 }
 
 
-function getIPsFromCmd
+getIPsFromCmd()
 {
   while (( $# != 0 )); do
     case "$1" in      # Do not prozess
@@ -208,7 +205,7 @@ function getIPsFromCmd
   generateRules
 }
 
-function getIPsFromFile
+getIPsFromFile()
 {
   local ip_=""
 
@@ -224,7 +221,7 @@ function getIPsFromFile
   generateRules
 }
 
-function getIPsFromStdin
+getIPsFromStdin()
 {
   local ip_=""
 
@@ -238,9 +235,9 @@ function getIPsFromStdin
 
   generateRules
 }
-  
 
-function actionClear
+
+actionClear()
 {
   cat << EOT | setkey -c
 flush;
@@ -248,7 +245,7 @@ spdflush;
 EOT
 }
 
-function actionInfo
+actionInfo()
 {
   cat << EOT
   algorithm       keylen (bits)   documented in
@@ -266,7 +263,7 @@ EOT
 }
 
 
-function checkKey
+checkKey()
 {
   local key_="$1"
 
@@ -275,7 +272,7 @@ function checkKey
   fi
 }
 
-function checkCipher
+checkCipher()
 {
   local cipher_="$1"
 
@@ -287,7 +284,7 @@ function checkCipher
 
 # this function checks the keysize and matches the cipher name against
 # them in $CIPHERS_
-function checkKeySize
+checkKeySize()
 {
   local ciph_=''
   local tmp_=''
@@ -345,7 +342,7 @@ function checkKeySize
          ;;
     *)  die "internal error (problem with CIPHERS_ $tmp_)"
   esac
-  
+
   local byte_=''
   byte_=`echo "$KEY_SIZE_/8"|bc -q`
   tmp_=`echo "$KEY_SIZE_%4" |bc -q`
@@ -357,7 +354,7 @@ function checkKeySize
 }
 
 
-function hashKey
+hashKey()
 {
   local key_="$1"
   local gen_="${2:-"false"}"    # if false, do not generate a key
@@ -365,7 +362,7 @@ function hashKey
   local to_die_='false'
   local byte_=`echo "$KEY_SIZE_/4"|bc -q`
   local tmp_=""
-  
+
   #case "$KEY_SIZE_" in
   #  128)  notice "key_size=$KEY_SIZE_"; echo "$key_" |md5deep ||to_die_='true'
   #          $to_die_ && die "problems with hashing your key"
@@ -397,7 +394,7 @@ function hashKey
 }
 
 
-function removeTmpFiles
+removeTmpFiles()
 {
   execute "rm -f $TMP_" warn
 }
