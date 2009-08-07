@@ -2,15 +2,16 @@ Source: grml-vpn
 Section: grml
 Priority: optional
 Maintainer: Michael Gebetsroither <gebi@grml.org>
-Build-Depends: debhelper (>= 4.0.0), xsltproc, docbook-xsl, asciidoc
-Standards-Version: 3.6.2
-Homepage: http://hg.grml.org/grml-vpn/
-XS-Vcs-hg: http://hg.grml.org/grml-vpn/
-XS-Vcs-Browser: http://hg.grml.org/grml-vpn/
+Uploaders: Michael Prokop <mika@grml.org>
+Build-Depends: debhelper (>= 5), xsltproc, docbook-xsl, asciidoc
+Standards-Version: 3.8.2
+Homepage: http://git.grml.org/?p=grml-vpn.git
+Vcs-git: git://git.grml.org/grml-vpn.git
+Vcs-Browser: http://git.grml.org/?p=grml-vpn.git
 
 Package: grml-vpn
 Architecture: all
 Depends: grml-shlib (>=1.02.04), ipsec-tools, md5deep, zsh, bc
 Description: program to establish encrypted communication channels in a network
- This program should provide an easy interface to setkey and ipsec on linux
+ This program should provide an easy interface to setkey and IPsec on Linux
  2.6. Good luck!

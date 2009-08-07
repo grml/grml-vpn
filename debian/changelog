@@ -2,8 +2,18 @@ grml-vpn (0.17) unstable; urgency=low
 
   * Drop 'function' keyword to make script compatible to grml-shlib with
     dash as /bin/sh.
+  * Use /bin/zsh instead of /usr/bin/zsh as shebang.
+  * Debian packaging:
+    - Bump Standard-Version to 3.8.2 (no further changes).
+    - Bump Build-Depends to dh >=5
+    - Bump Compat Version to 5
+    - Spelling corrections in long description
+    - Adjust VCS headers
+    - Switch order of binary-arch and binary-indep
+    - Update copyright file (FSFE stuff, reference GPL-2)
+    - Drop empty debian/conffiles
 
- -- Michael Prokop <mika@grml.org>  Fri, 07 Aug 2009 13:36:17 +0200
+ -- Michael Prokop <mika@grml.org>  Fri, 07 Aug 2009 13:47:58 +0200
 
 grml-vpn (0.16) unstable; urgency=low
 
