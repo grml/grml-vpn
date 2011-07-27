@@ -8,6 +8,8 @@ Standards-Version: 3.9.2
 Homepage: http://git.grml.org/?p=grml-vpn.git
 Vcs-git: git://git.grml.org/grml-vpn.git
 Vcs-Browser: http://git.grml.org/?p=grml-vpn.git
+Origin: Grml
+Bugs: mailto:bugs@grml.org
 
 Package: grml-vpn
 Architecture: all
