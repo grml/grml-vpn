@@ -3,7 +3,7 @@ Section: grml
 Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
 Build-Depends: debhelper (>= 5), xsltproc, docbook-xsl, asciidoc
-Standards-Version: 3.9.2
+Standards-Version: 4.7.0
 Homepage: http://git.grml.org/?p=grml-vpn.git
 Vcs-git: https://github.com/grml/grml-vpn.git
 Vcs-Browser: https://github.com/grml/grml-vpn
