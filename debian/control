@@ -25,5 +25,4 @@ Depends:
  zsh,
  ${misc:Depends},
 Description: program to establish encrypted communication channels in a network
- This program should provide an easy interface to setkey and IPsec on Linux
- 2.6. Good luck!
+ This program provides an easy interface to setkey and IPsec on Linux.
