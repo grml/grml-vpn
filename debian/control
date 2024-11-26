@@ -2,7 +2,12 @@ Source: grml-vpn
 Section: grml
 Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
-Build-Depends: debhelper-compat (= 12), xsltproc, docbook-xsl, asciidoc
+Build-Depends:
+ debhelper-compat (= 12),
+Build-Depends-Indep:
+ asciidoc,
+ docbook-xsl,
+ xsltproc,
 Standards-Version: 4.7.0
 Homepage: http://git.grml.org/?p=grml-vpn.git
 Vcs-git: https://github.com/grml/grml-vpn.git
